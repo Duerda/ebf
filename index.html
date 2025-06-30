@@ -1,225 +1,51 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>EBF - Sistema</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #f8fafc;
-  min-height: 100vh;
-  padding: 20px;
-}
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  background: white;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-}
-h1 {
-  text-align: center;
-  color: #1e293b;
-  margin-bottom: 24px;
-  font-size: 28px;
-  font-weight: 700;
-}
-.nav {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 24px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-.btn {
-  padding: 10px 16px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s;
-  text-decoration: none;
-  display: inline-block;
-}
-.btn-primary { background: #3b82f6; color: white; }
-.btn-success { background: #10b981; color: white; }
-.btn-warning { background: #f59e0b; color: white; }
-.btn-danger { background: #ef4444; color: white; }
-.btn:hover { transform: translateY(-1px); opacity: 0.9; }
-.btn.active { background: #1e293b !important; }
-.section { display: none; }
-.section.active { display: block; }
-.form-group { margin-bottom: 16px; }
-.form-group label {
-  display: block;
-  margin-bottom: 6px;
-  font-weight: 500;
-  color: #374151;
-}
-.form-group input, .form-group select {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 14px;
-}
-.form-group input:focus, .form-group select:focus {
-  border-color: #3b82f6;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-.aluno-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px;
-  margin: 8px 0;
-  background: #f9fafb;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-}
-.aluno-nome { font-weight: 500; color: #1e293b; }
-.presenca-btns { display: flex; gap: 6px; }
-.btn-sm { padding: 6px 12px; font-size: 12px; }
-.card {
-  background: #f9fafb;
-  padding: 16px;
-  margin: 12px 0;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-}
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 12px;
-  margin: 16px 0;
-}
-.stat-card {
-  background: white;
-  padding: 12px;
-  border-radius: 8px;
-  text-align: center;
-  border: 1px solid #e5e7eb;
-}
-.stat-number { font-size: 24px; font-weight: 700; color: #3b82f6; }
-.stat-label { color: #6b7280; font-size: 12px; margin-top: 4px; }
-.success-msg {
-  background: #d1fae5;
-  color: #065f46;
-  padding: 12px;
-  border-radius: 6px;
-  margin: 12px 0;
-  text-align: center;
-  font-weight: 500;
-}
-.highlight { border: 2px solid #fbbf24; background: #fef3c7; }
-@media (max-width: 600px) {
-  .container { padding: 16px; margin: 10px; }
-  .aluno-item { flex-direction: column; gap: 8px; }
-  .presenca-btns { width: 100%; justify-content: center; }
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EBF - Sistema</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: sans-serif; background: #f8fafc; padding: 20px; }
+    .container { max-width: 900px; margin: 0 auto; background: white; border-radius: 12px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    h1 { text-align: center; margin-bottom: 24px; }
+    .nav { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; justify-content: center; }
+    .btn { padding: 10px 16px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; }
+    .btn-primary { background: #3b82f6; color: white; }
+    .btn-success { background: #10b981; color: white; }
+    .btn-warning { background: #f59e0b; color: white; }
+    .btn-danger { background: #ef4444; color: white; }
+    .section { display: none; }
+    .section.active { display: block; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; margin-bottom: 6px; font-weight: 500; }
+    input, select { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; }
+    .card { background: #f9fafb; padding: 16px; margin: 12px 0; border-radius: 8px; border: 1px solid #e5e7eb; }
+    #listaDatasDisponiveis { max-height: 200px; overflow-y: auto; border: 1px solid #e5e7eb; padding: 12px; background: #f9fafb; border-radius: 6px; }
+  </style>
 </head>
 <body>
 <div class="container">
   <h1>🎪 EBF - Sistema de Controle</h1>
-  
   <div class="nav">
-    <button class="btn btn-primary active" onclick="showSection('home')">🏠 Início</button>
-    <button class="btn btn-success" onclick="showSection('cadastro')">👶 Cadastro</button>
-    <button class="btn btn-warning" onclick="showSection('chamada')">📋 Chamada</button>
-    <button class="btn btn-danger" onclick="showSection('relatorio')">📊 Relatório</button>
+    <button class="btn btn-primary" onclick="showSection('relatorio')">📊 Relatório</button>
   </div>
 
-  <!-- HOME -->
-  <div id="home" class="section active">
-    <div style="text-align: center;">
-      <h2>🌟 Bem-vindo!</h2>
-      <p style="margin: 16px 0; color: #6b7280;">Sistema de gerenciamento da EBF</p>
-      <div class="stats">
-        <div class="stat-card">
-          <div class="stat-number" id="totalAlunos">0</div>
-          <div class="stat-label">Total Alunos</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="presentesHoje">0</div>
-          <div class="stat-label">Presentes Hoje</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="faltasHoje">0</div>
-          <div class="stat-label">Faltas Hoje</div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <div id="relatorio" class="section active">
+    <h2>📊 Relatório</h2>
 
-  <!-- CADASTRO -->
-  <div id="cadastro" class="section">
-    <h2>👶 Cadastro</h2>
-    <form id="formCadastro">
+    <div class="card">
+      <h3>📅 Relatório por Data</h3>
       <div class="form-group">
-        <label>Nome:</label>
-        <input type="text" id="nomeAluno" required>
+        <label>Data:</label>
+        <input type="date" id="dataRelatorio">
       </div>
-      <div class="form-group">
-        <label>Sala:</label>
-        <select id="salaAluno" required>
-          <option value="">Selecione...</option>
-          <option value="0-4">0 a 4 anos</option>
-          <option value="5-7">5 a 7 anos</option>
-          <option value="8-11">8 a 11 anos</option>
-          <option value="12-20">12 a 20 anos</option>
-          <option value="maes">Mães</option>
-        </select>
-      </div>
-      <button type="submit" class="btn btn-success">✅ Cadastrar</button>
-    </form>
-    <div id="msgCadastro"></div>
-  </div>
-
-  <!-- CHAMADA -->
-  <div id="chamada" class="section">
-    <h2>📋 Chamada</h2>
-    <div class="form-group">
-      <label>Data:</label>
-      <input type="date" id="dataChamada" onchange="carregarChamada()">
-    </div>
-    <div class="form-group">
-      <label>Sala:</label>
-      <select id="salaChamada" onchange="carregarChamada()">
-        <option value="">Selecione...</option>
-        <option value="0-4">0 a 4 anos</option>
-        <option value="5-7">5 a 7 anos</option>
-        <option value="8-11">8 a 11 anos</option>
-        <option value="12-20">12 a 20 anos</option>
-        <option value="maes">Mães</option>
-      </select>
+      <div id="conteudoRelatorio"></div>
     </div>
 
-    <div id="cadastroRapido" style="display:none" class="card">
-      <h3>➕ Cadastro Rápido</h3>
-      <div style="display:flex;gap:8px;align-items:end">
-        <div class="form-group" style="flex:1;margin:0">
-          <input type="text" id="nomeRapido" placeholder="Nome...">
-        </div>
-        <button class="btn btn-primary btn-sm" onclick="cadastroRapido()">Adicionar</button>
-      </div>
-    </div>
-
-    <div id="listaChamada"></div>
-    <button id="btnSalvarChamada" class="btn btn-success" onclick="salvarChamada()" style="display:none">💾 Salvar</button>
-    <div id="msgChamada"></div>
-  </div>
-
-    <!-- Relatório por múltiplas datas -->
     <div class="card">
       <h3>📊 Relatório de Presença - Múltiplas Datas</h3>
-      
       <div class="form-group">
         <label>Sala:</label>
         <select id="salaRelatorioMultiplo">
@@ -238,7 +64,7 @@ h1 {
           <button class="btn btn-primary btn-sm" onclick="selecionarTodasDatas()">Selecionar Tudo</button>
           <button class="btn btn-warning btn-sm" onclick="limparSelecaoDatas()">Limpar Seleção</button>
         </div>
-        <div id="listaDatasDisponiveis" style="max-height: 200px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; background: #f9fafb;">
+        <div id="listaDatasDisponiveis">
           <p style="text-align: center; color: #6b7280;">Nenhuma data com registros encontrada</p>
         </div>
       </div>
@@ -250,247 +76,26 @@ h1 {
 
       <div id="previewRelatorioMultiplo" style="margin-top: 16px;"></div>
     </div>
-  </div>
-  <!-- RELATÓRIO -->
-  <div id="relatorio" class="section">
-    <h2>📊 Relatório</h2>
-    <div class="form-group">
-      <label>Data:</label>
-      <input type="date" id="dataRelatorio" onchange="carregarRelatorio()">
-    </div>
-    <div id="conteudoRelatorio"></div>
+
   </div>
 </div>
-
 <script>
-let dados = { alunos: {}, chamadas: {} };
-
-const salas = { "0-4": "0 a 4 anos", "5-7": "5 a 7 anos", "8-11": "8 a 11 anos", "12-20": "12 a 20 anos", "maes": "Mães" };
-
-window.showSection = (id) => {
-  document.querySelectorAll('.section, .btn').forEach(e => e.classList.remove('active'));
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(e => e.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  document.querySelector(`[onclick="showSection('${id}')"]`).classList.add('active');
-  
-  if (id === 'home') atualizarHome();
-  if (id === 'relatorio') document.getElementById('dataRelatorio').value = new Date().toISOString().split('T')[0];
-};
-
-window.atualizarHome = () => {
-  const total = Object.keys(dados.alunos).length;
-  const hoje = new Date().toISOString().split('T')[0];
-  const chamadaHoje = dados.chamadas[hoje] || {};
-  
-  let presentes = 0, faltas = 0;
-  Object.values(chamadaHoje).forEach(sala => {
-    Object.values(sala).forEach(status => {
-      if (status === 'presente') presentes++;
-      else if (status === 'falta') faltas++;
-    });
-  });
-  
-  document.getElementById('totalAlunos').textContent = total;
-  document.getElementById('presentesHoje').textContent = presentes;
-  document.getElementById('faltasHoje').textContent = faltas;
-};
-
-// Cadastro
-document.getElementById('formCadastro').onsubmit = (e) => {
-  e.preventDefault();
-  const nome = document.getElementById('nomeAluno').value.trim();
-  const sala = document.getElementById('salaAluno').value;
-  
-  if (!nome || !sala) return;
-  
-  const id = Date.now().toString();
-  dados.alunos[id] = { nome, sala, id };
-  
-  document.getElementById('msgCadastro').innerHTML = '<div class="success-msg">✅ Cadastrado!</div>';
-  document.getElementById('formCadastro').reset();
-  setTimeout(() => document.getElementById('msgCadastro').innerHTML = '', 2000);
-};
-
-// Chamada
-window.carregarChamada = () => {
-  const sala = document.getElementById('salaChamada').value;
-  const data = document.getElementById('dataChamada').value;
-  
-  if (!sala || !data) {
-    document.getElementById('listaChamada').innerHTML = '';
-    document.getElementById('btnSalvarChamada').style.display = 'none';
-    document.getElementById('cadastroRapido').style.display = 'none';
-    return;
-  }
-  
-  document.getElementById('cadastroRapido').style.display = 'block';
-  
-  const alunosSala = Object.values(dados.alunos).filter(a => a.sala === sala);
-  const chamadaData = dados.chamadas[data]?.[sala] || {};
-  
-  let html = '<h3>👥 Alunos:</h3>';
-  
-  if (alunosSala.length === 0) {
-    html += '<p style="text-align:center;color:#6b7280;padding:20px">Nenhum aluno nesta sala</p>';
-  } else {
-    alunosSala.forEach(aluno => {
-      const status = chamadaData[aluno.id] || '';
-      html += `
-        <div class="aluno-item">
-          <div class="aluno-nome">${aluno.nome}</div>
-          <div class="presenca-btns">
-            <button class="btn btn-success btn-sm ${status === 'presente' ? 'active' : ''}" onclick="marcarPresenca('${aluno.id}', 'presente')">✅</button>
-            <button class="btn btn-danger btn-sm ${status === 'falta' ? 'active' : ''}" onclick="marcarPresenca('${aluno.id}', 'falta')">❌</button>
-            <button class="btn btn-warning btn-sm" onclick="removerAluno('${aluno.id}')">🗑️</button>
-          </div>
-        </div>
-      `;
-    });
-  }
-  
-  document.getElementById('listaChamada').innerHTML = html;
-  document.getElementById('btnSalvarChamada').style.display = 'block';
-};
-
-window.marcarPresenca = (alunoId, status) => {
-  const sala = document.getElementById('salaChamada').value;
-  const data = document.getElementById('dataChamada').value;
-  if (!data) return;
-  
-  if (!dados.chamadas[data]) dados.chamadas[data] = {};
-  if (!dados.chamadas[data][sala]) dados.chamadas[data][sala] = {};
-  
-  dados.chamadas[data][sala][alunoId] = status;
-  carregarChamada();
-};
-
-window.cadastroRapido = () => {
-  const nome = document.getElementById('nomeRapido').value.trim();
-  const sala = document.getElementById('salaChamada').value;
-  
-  if (!nome || !sala) return;
-  
-  const id = Date.now().toString();
-  dados.alunos[id] = { nome, sala, id };
-  
-  document.getElementById('nomeRapido').value = '';
-  carregarChamada();
-};
-
-window.removerAluno = (alunoId) => {
-  if (!confirm('Remover aluno permanentemente?')) return;
-  
-  // Remove do cadastro
-  delete dados.alunos[alunoId];
-  
-  // Remove de todas as chamadas
-  Object.keys(dados.chamadas).forEach(data => {
-    Object.keys(dados.chamadas[data]).forEach(sala => {
-      delete dados.chamadas[data][sala][alunoId];
-    });
-  });
-  
-  carregarChamada();
-  atualizarHome();
-  
-  document.getElementById('msgChamada').innerHTML = '<div class="success-msg">🗑️ Removido!</div>';
-  setTimeout(() => document.getElementById('msgChamada').innerHTML = '', 2000);
-};
-
-window.salvarChamada = () => {
-  const sala = document.getElementById('salaChamada').value;
-  const data = document.getElementById('dataChamada').value;
-  
-  if (!data || !sala) return;
-  
-  const chamadaSala = dados.chamadas[data]?.[sala] || {};
-  
-  let html = `<h2>Chamada - ${salas[sala]}</h2><p>Data: ${new Date(data + 'T00:00:00').toLocaleDateString('pt-BR')}</p><table border='1' cellpadding='8' style='width:100%;border-collapse:collapse'><tr style='background:#f8f9fa'><th>Aluno</th><th>Status</th></tr>`;
-  
-  Object.entries(chamadaSala).forEach(([id, status]) => {
-    const statusText = status === 'presente' ? '✅ Presente' : '❌ Falta';
-    html += `<tr><td>${dados.alunos[id]?.nome || 'N/A'}</td><td>${statusText}</td></tr>`;
-  });
-  
-  html += '</table>';
-  
-  html2pdf().from(html).save(`Chamada-${salas[sala]}-${data}.pdf`);
-  
-  document.getElementById('msgChamada').innerHTML = '<div class="success-msg">💾 PDF gerado!</div>';
-  setTimeout(() => document.getElementById('msgChamada').innerHTML = '', 2000);
-  atualizarHome();
-};
-
-// Relatório
-window.carregarRelatorio = () => {
-  const data = document.getElementById('dataRelatorio').value;
-  if (!data) return;
-  
-  const chamadaData = dados.chamadas[data] || {};
-  
-  let html = `<h3>📅 ${new Date(data + 'T00:00:00').toLocaleDateString('pt-BR')}</h3>`;
-  let maxPresentes = 0, salaDestaque = '';
-  
-  // Calcular dados
-  const dadosSalas = {};
-  Object.keys(salas).forEach(sala => {
-    const alunosSala = Object.values(dados.alunos).filter(a => a.sala === sala);
-    const chamadaSala = chamadaData[sala] || {};
-    const presentes = Object.values(chamadaSala).filter(s => s === 'presente').length;
-    const faltas = Object.values(chamadaSala).filter(s => s === 'falta').length;
-    
-    dadosSalas[sala] = { presentes, faltas, total: alunosSala.length };
-    
-    if (presentes > maxPresentes) {
-      maxPresentes = presentes;
-      salaDestaque = sala;
-    }
-  });
-  
-  // Gerar cards
-  Object.keys(salas).forEach(sala => {
-    const d = dadosSalas[sala];
-    const isDestaque = sala === salaDestaque && maxPresentes > 0;
-    
-    html += `
-      <div class="card ${isDestaque ? 'highlight' : ''}">
-        <h4>${salas[sala]} ${isDestaque ? '🥇' : ''}</h4>
-        <div class="stats">
-          <div class="stat-card">
-            <div class="stat-number">${d.total}</div>
-            <div class="stat-label">Total</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number" style="color:#10b981">${d.presentes}</div>
-            <div class="stat-label">Presentes</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-number" style="color:#ef4444">${d.faltas}</div>
-            <div class="stat-label">Faltas</div>
-          </div>
-        </div>
-      </div>
-    `;
-  });
-  
-  html += `<button class="btn btn-primary" onclick="salvarRelatorioPdf('${data}')">📄 Gerar PDF</button>`;
-  document.getElementById('conteudoRelatorio').innerHTML = html;
-};
-
-window.salvarRelatorioPdf = (data) => {
-  const conteudo = document.getElementById('conteudoRelatorio');
-  const dataFormatada = new Date(data + 'T00:00:00').toLocaleDateString('pt-BR');
-  html2pdf().from(conteudo).save(`Relatorio-EBF-${dataFormatada}.pdf`);
-};
-
-// Inicialização
-document.addEventListener('DOMContentLoaded', () => {
-  const hoje = new Date().toISOString().split('T')[0];
-  document.getElementById('dataRelatorio').value = hoje;
-  document.getElementById('dataChamada').value = hoje;
-  
-  
-  atualizarHome();
-});
+}
+function selecionarTodasDatas() {
+  alert('Função de selecionar todas as datas simulada.');
+}
+function limparSelecaoDatas() {
+  alert('Função de limpar seleção simulada.');
+}
+function gerarRelatorioMultiplo() {
+  alert('Função de gerar PDF simulada.');
+}
+function visualizarRelatorioMultiplo() {
+  alert('Função de visualização simulada.');
+}
 </script>
 </body>
 </html>
