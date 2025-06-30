@@ -215,7 +215,55 @@ h1 {
     <button id="btnSalvarChamada" class="btn btn-success" onclick="salvarChamada()" style="display:none">💾 Salvar</button>
     <div id="msgChamada"></div>
   </div>
+<!-- RELATÓRIO -->
+  <div id="relatorio" class="section">
+    <h2>📊 Relatório</h2>
+    
+    <!-- Relatório por data única -->
+    <div class="card">
+      <h3>📅 Relatório por Data</h3>
+      <div class="form-group">
+        <label>Data:</label>
+        <input type="date" id="dataRelatorio" onchange="carregarRelatorio()">
+      </div>
+      <div id="conteudoRelatorio"></div>
+    </div>
 
+    <!-- Relatório por múltiplas datas -->
+    <div class="card">
+      <h3>📊 Relatório de Presença - Múltiplas Datas</h3>
+      
+      <div class="form-group">
+        <label>Sala:</label>
+        <select id="salaRelatorioMultiplo">
+          <option value="">Todas as salas</option>
+          <option value="0-4">0 a 4 anos</option>
+          <option value="5-7">5 a 7 anos</option>
+          <option value="8-11">8 a 11 anos</option>
+          <option value="12-20">12 a 20 anos</option>
+          <option value="maes">Mães</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>📄 Selecione os dias que deseja incluir no relatório:</label>
+        <div style="display: flex; gap: 8px; margin: 8px 0; flex-wrap: wrap;">
+          <button class="btn btn-primary btn-sm" onclick="selecionarTodasDatas()">Selecionar Tudo</button>
+          <button class="btn btn-warning btn-sm" onclick="limparSelecaoDatas()">Limpar Seleção</button>
+        </div>
+        <div id="listaDatasDisponiveis" style="max-height: 200px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; background: #f9fafb;">
+          <p style="text-align: center; color: #6b7280;">Nenhuma data com registros encontrada</p>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-top: 16px;">
+        <button class="btn btn-success" onclick="gerarRelatorioMultiplo()">📄 Gerar Relatório PDF</button>
+        <button class="btn btn-primary" onclick="visualizarRelatorioMultiplo()">👁️ Visualizar</button>
+      </div>
+
+      <div id="previewRelatorioMultiplo" style="margin-top: 16px;"></div>
+    </div>
+  </div>
   <!-- RELATÓRIO -->
   <div id="relatorio" class="section">
     <h2>📊 Relatório</h2>
