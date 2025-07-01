@@ -1,15 +1,13 @@
-</html>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>EBF - Sistema</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-  <link rel="stylesheet" href="style.css" />
-   <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EBF - Sistema</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
@@ -27,17 +25,17 @@
   <div id="home" class="section active">
     <h2>🌟 Bem-vinda, linda Eduarda 🌟</h2>
     <p style="margin:16px 0;color:#6b7280">Sistema de gerenciamento EBF da secretária Duda</p>
-    <div class="stats" style="display:flex; gap: 20px; margin-top: 20px;">
-      <div class="stat-card" style="background:#fff; padding:15px; border-radius:8px; flex:1; text-align:center;">
-        <div class="stat-number" id="totalAlunos" style="font-size:2rem;">0</div>
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-number" id="totalAlunos">0</div>
         <div class="stat-label">Total Alunos</div>
       </div>
-      <div class="stat-card" style="background:#fff; padding:15px; border-radius:8px; flex:1; text-align:center;">
-        <div class="stat-number" id="presentesHoje" style="font-size:2rem;">0</div>
+      <div class="stat-card">
+        <div class="stat-number" id="presentesHoje">0</div>
         <div class="stat-label">Presentes Hoje</div>
       </div>
-      <div class="stat-card" style="background:#fff; padding:15px; border-radius:8px; flex:1; text-align:center;">
-        <div class="stat-number" id="faltasHoje" style="font-size:2rem;">0</div>
+      <div class="stat-card">
+        <div class="stat-number" id="faltasHoje">0</div>
         <div class="stat-label">Faltas Hoje</div>
       </div>
     </div>
@@ -88,7 +86,7 @@
 
     <div id="cadastroRapido" style="display:none; margin-bottom: 20px;">
       <h3>➕ Cadastro Rápido</h3>
-      <div style="display:flex;gap:8px">
+      <div style="display:flex; gap:8px;">
         <input type="text" id="nomeRapido" placeholder="Nome..." />
         <button class="btn btn-primary btn-sm" onclick="cadastroRapido()">Adicionar</button>
       </div>
@@ -172,7 +170,6 @@
 
     document.getElementById("cadastroRapido").style.display = "block";
 
-    // Primeiro, buscar os alunos da sala
     db.ref("alunos").orderByChild("sala").equalTo(sala).once("value", alunosSnap => {
       const alunos = alunosSnap.val();
       if (!alunos) {
@@ -181,25 +178,23 @@
         return;
       }
 
-      // Depois, buscar os status da chamada para a data e sala
       db.ref(`chamadas/${data}/${sala}`).once("value", chamadaSnap => {
         const chamada = chamadaSnap.val() || {};
 
         let html = `<h3>📋 Chamada de ${salas[sala]} - ${data}</h3>`;
 
-        Object.values(alunos).forEach(aluno => {
-          const status = chamada[aluno.id] || null;
+        Object.entries(alunos).forEach(([id, aluno]) => {
+          const status = chamada[id] || null;
 
-          // Definir classes para os botões de acordo com o status
           const btnPresenteClass = status === "presente" ? "btn-success active" : "btn-success";
           const btnFaltaClass = status === "falta" ? "btn-danger active" : "btn-danger";
 
           html += `
-            <div style="display:flex;gap:8px;align-items:center;margin:4px 0; background:#fff; padding:8px; border-radius:5px;">
+            <div style="display:flex;gap:8px;align-items:center;margin:4px 0;">
               <span style="flex:1">${aluno.nome}</span>
-              <button onclick="marcarPresenca('${aluno.id}','presente')" class="btn btn-sm ${btnPresenteClass}">✅</button>
-              <button onclick="marcarPresenca('${aluno.id}','falta')" class="btn btn-sm ${btnFaltaClass}">❌</button>
-              <button onclick="removerAluno('${aluno.id}')" class="btn btn-warning btn-sm">🗑️</button>
+              <button onclick="marcarPresenca('${id}','presente')" class="btn btn-sm ${btnPresenteClass}">✅</button>
+              <button onclick="marcarPresenca('${id}','falta')" class="btn btn-sm ${btnFaltaClass}">❌</button>
+              <button onclick="removerAluno('${id}')" class="btn btn-warning btn-sm">🗑️</button>
             </div>
           `;
         });
@@ -216,10 +211,8 @@
     const data = document.getElementById("dataChamada").value;
     if (!sala || !data) return;
 
-    db.ref(`chamadas/${data}/${sala}/${alunoId}`).set(status).then(() => {
-      // Recarrega a lista para atualizar os botões
-      carregarChamada();
-    });
+    db.ref(`chamadas/${data}/${sala}/${alunoId}`).set(status);
+    carregarChamada(); // Atualiza visual após marcar
   };
 
   // Cadastro rápido
@@ -273,32 +266,143 @@
 
   // Seções
   window.showSection = (id) => {
-    document.querySelectorAll(".section").forEach(e => e.classList.remove("active"));
-    document.querySelectorAll(".nav .btn").forEach(e => e.classList.remove("active"));
+    document.querySelectorAll(".section, .btn").forEach(e => e.classList.remove("active"));
     document.getElementById(id).classList.add("active");
-    document.querySelector(`.nav button[onclick="showSection('${id}')"]`).classList.add("active");
+    document.querySelector(`[onclick="showSection('${id}')"]`).classList.add("active");
     if (id === "home") atualizarHome();
   };
 
-  // Inicializa com a data de hoje e eventos
+  // Inicializa com a data de hoje
   document.addEventListener("DOMContentLoaded", () => {
     const hoje = new Date().toISOString().split("T")[0];
     document.getElementById("dataChamada").value = hoje;
     atualizarHome();
-
     document.getElementById("salaChamada").onchange = carregarChamada;
     document.getElementById("dataChamada").onchange = carregarChamada;
   });
 
-  // Funções placeholders para relatório multi datas e salvar chamada (você pode implementar depois)
-  window.gerarRelatorioMultiDatas = () => {
-    alert("Função de gerar relatório multi datas ainda não implementada.");
+window.salvarChamada = () => {
+  const sala = document.getElementById("salaChamada").value;
+  const data = document.getElementById("dataChamada").value;
+  if (!sala || !data) {
+    alert("Selecione a data e a sala antes de salvar.");
+    return;
+  }
+  alert(`Chamada de ${salas[sala]} em ${data} salva com sucesso!`);
+};
+
+// Gerar relatório multi datas
+window.gerarRelatorioMultiDatas = () => {
+  const sala = document.getElementById("salaChamada").value;
+  const datasTexto = document.getElementById("datasRelatorioMulti").value.trim();
+
+  if (!sala) {
+    alert("Selecione a sala para gerar o relatório.");
+    return;
+  }
+  if (!datasTexto) {
+    alert("Digite uma ou mais datas separadas por vírgula no formato DD/MM.");
+    return;
+  }
+
+  const datas = datasTexto.split(",").map(d => d.trim());
+
+  // Converte "DD/MM" para "YYYY-MM-DD" assumindo ano atual (ex: "17/07" => "2025-07-17")
+  const anoAtual = new Date().getFullYear();
+  const datasISO = datas.map(d => {
+    const partes = d.split("/");
+    if (partes.length !== 2) return null;
+    const dia = partes[0].padStart(2, "0");
+    const mes = partes[1].padStart(2, "0");
+    return `${anoAtual}-${mes}-${dia}`;
+  }).filter(d => d !== null);
+
+  if (datasISO.length === 0) {
+    alert("Datas inválidas, use o formato DD/MM.");
+    return;
+  }
+
+  const relatorioDiv = document.getElementById("relatorioMultiDatas");
+  relatorioDiv.innerHTML = "<p>Carregando relatório...</p>";
+
+  // Pega os alunos da sala pra montar a tabela com nomes fixos
+  db.ref("alunos").orderByChild("sala").equalTo(sala).once("value", alunosSnap => {
+    const alunos = alunosSnap.val();
+    if (!alunos) {
+      relatorioDiv.innerHTML = "<p>Nenhum aluno cadastrado nessa sala.</p>";
+      return;
+    }
+
+    // Monta cabeçalho da tabela com datas
+    let tabela = `<table border="1" cellpadding="5" cellspacing="0" style="border-collapse:collapse; width: 100%;">
+      <thead>
+        <tr>
+          <th>Aluno</th>`;
+    datasISO.forEach(d => {
+      // Formatar para DD/MM para mostrar no cabeçalho
+      const partes = d.split("-");
+      tabela += `<th>${partes[2]}/${partes[1]}</th>`;
+    });
+    tabela += `</tr></thead><tbody>`;
+
+    // Agora para cada aluno, pegar presença/falta nas datas
+    const alunosArray = Object.values(alunos);
+    const alunosPorId = Object.entries(alunos).reduce((acc, [key, val]) => {
+      acc[key] = val.nome;
+      return acc;
+    }, {});
+
+    // Função para buscar presença em uma data
+    const promessas = datasISO.map(dataISO => {
+      return db.ref(`chamadas/${dataISO}/${sala}`).once("value").then(snapshot => {
+        return { data: dataISO, chamada: snapshot.val() || {} };
+      });
+    });
+
+    Promise.all(promessas).then(results => {
+      // results = [{data, chamada}, ...]
+      alunosArray.forEach(aluno => {
+        tabela += `<tr><td>${aluno.nome}</td>`;
+        results.forEach(res => {
+          const status = res.chamada[aluno.id] || "";
+          let simbolo = "";
+          if (status === "presente") simbolo = "P";
+          else if (status === "falta") simbolo = "F";
+          tabela += `<td style="text-align:center">${simbolo}</td>`;
+        });
+        tabela += `</tr>`;
+      });
+
+      tabela += `</tbody></table>`;
+
+      // Adiciona botão para salvar em PDF
+      tabela += `<button class="btn btn-primary" style="margin-top: 10px;" onclick="baixarPDF()">📥 Baixar PDF</button>`;
+
+      relatorioDiv.innerHTML = tabela;
+    }).catch(err => {
+      relatorioDiv.innerHTML = `<p style="color:red;">Erro ao gerar relatório: ${err.message}</p>`;
+    });
+  });
+};
+
+// Função para baixar PDF do relatório
+window.baixarPDF = () => {
+  const relatorioDiv = document.getElementById("relatorioMultiDatas");
+  const element = relatorioDiv.querySelector("table");
+  if (!element) {
+    alert("Não há tabela para gerar PDF.");
+    return;
+  }
+  const opt = {
+    margin:       0.5,
+    filename:     'relatorio-chamada.pdf',
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2 },
+    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
   };
-  window.salvarChamada = () => {
-    alert("Função salvar chamada não necessária, os dados já são salvos automaticamente.");
-  };
+  html2pdf().set(opt).from(element).save();
+};
 </script>
 
 </body>
 </html>
-
