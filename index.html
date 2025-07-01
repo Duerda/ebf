@@ -73,6 +73,9 @@
       <div class="form-group">
   <label>Datas (separadas por vírgula):</label>
   <input type="text" id="datasRelatorioMulti" placeholder="Ex: 17/07,18/07,19/07">
+        <div id="listaChamada"></div>
+<button class="btn btn-success" style="margin-top:10px" onclick="salvarChamada()">💾 Salvar no Sistema</button>
+
 </div>
 <button class="btn btn-primary" onclick="gerarRelatorioMultiDatas()">📄 Gerar Relatório Multi Datas</button>
 <div id="relatorioMultiDatas" style="margin-top:20px"></div>
@@ -397,6 +400,40 @@ window.salvarRelatorioMultiDatasPdf = () => {
   const conteudo = document.getElementById('relatorioMultiDatas');
   html2pdf().from(conteudo).save('Relatorio-MultiDatas.pdf');
 };
+document.getElementById('salaChamada').onchange = carregarChamada;
+
+function carregarChamada() {
+  const sala = document.getElementById('salaChamada').value;
+  const alunosSala = Object.values(dados.alunos).filter(a => a.sala === sala);
+  if (!sala || alunosSala.length === 0) {
+    document.getElementById('listaChamada').innerHTML = '<p style="color:#6b7280;padding:10px">Nenhum aluno nessa sala</p>';
+    return;
+  }
+
+  let html = `<h3>📋 Chamada de ${salas[sala]}</h3>`;
+  alunosSala.forEach(aluno => {
+    html += `
+      <div style="display:flex;gap:8px;align-items:center;margin:4px 0">
+        <span style="flex:1">${aluno.nome}</span>
+        <button onclick="marcarPresenca('${aluno.id}','presente')" class="btn btn-success btn-sm">✅</button>
+        <button onclick="marcarPresenca('${aluno.id}','falta')" class="btn btn-danger btn-sm">❌</button>
+      </div>
+    `;
+  });
+
+  document.getElementById('listaChamada').innerHTML = html;
+}
+
+function marcarPresenca(alunoId, status) {
+  const sala = document.getElementById('salaChamada').value;
+  const hoje = new Date().toISOString().split('T')[0];
+  if (!dados.chamadas[hoje]) dados.chamadas[hoje] = {};
+  if (!dados.chamadas[hoje][sala]) dados.chamadas[hoje][sala] = {};
+  dados.chamadas[hoje][sala][alunoId] = status;
+}
+function salvarChamada() {
+  alert('✅ Chamada do dia salva no sistema!');
+}
 
 </script>
 </body>
