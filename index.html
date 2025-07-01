@@ -70,6 +70,13 @@
     <div class="form-group">
       <label>Data:</label>
       <input type="date" id="dataChamada" onchange="carregarChamada()">
+      <div class="form-group">
+  <label>Datas (separadas por vírgula):</label>
+  <input type="text" id="datasRelatorioMulti" placeholder="Ex: 17/07,18/07,19/07">
+</div>
+<button class="btn btn-primary" onclick="gerarRelatorioMultiDatas()">📄 Gerar Relatório Multi Datas</button>
+<div id="relatorioMultiDatas" style="margin-top:20px"></div>
+
     </div>
     <div class="form-group">
       <label>Sala:</label>
@@ -96,14 +103,8 @@
     <div id="listaChamada"></div>
     <button id="btnSalvarChamada" class="btn btn-success" onclick="salvarChamada()" style="display:none">💾 Salvar</button>
     <div id="msgChamada"></div>
-  </div
-    <div class="form-group">
-  <label>Datas (separadas por vírgula):</label>
-  <input type="text" id="datasRelatorioMulti" placeholder="Ex: 17/07,18/07,19/07">
-</div>
-<button class="btn btn-primary" onclick="gerarRelatorioMultiDatas()">📄 Gerar Relatório Multi Datas</button>
-<div id="relatorioMultiDatas" style="margin-top:20px"></div>
-
+  </div>
+    
     
   <div id="msgChamada"></div>
 </div>
