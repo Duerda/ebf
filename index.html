@@ -120,6 +120,53 @@
 </div>
 
 <script>
+  // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+import { getDatabase, ref, set } from "firebase/database"; // Importando o Firebase Database
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyD7atpL2A3pQaE8gjGLfsukXVhK0NtgO-w",
+  authDomain: "ebf-secretaria.firebaseapp.com",
+  databaseURL: "https://ebf-secretaria-default-rtdb.firebaseio.com",
+  projectId: "ebf-secretaria",
+  storageBucket: "ebf-secretaria.firebasestorage.app",
+  messagingSenderId: "36994588954",
+  appId: "1:36994588954:web:8d78a074acd15862684ca3",
+  measurementId: "G-PQZMG8MBLE"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const database = getDatabase(app); // Inicializando o banco de dados
+
+// Cadastro
+document.getElementById('formCadastro').onsubmit = (e) => {
+  e.preventDefault();
+  const nome = document.getElementById('nomeAluno').value.trim();
+  const sala = document.getElementById('salaAluno').value;
+  
+  if (!nome || !sala) return;
+  
+  const id = Date.now().toString();
+  dados.alunos[id] = { nome, sala, id };
+
+  // Gravar no Firebase
+  set(ref(database, 'alunos/' + id), {
+    nome: nome,
+    sala: sala,
+    id: id
+  }).then(() => {
+    document.getElementById('msgCadastro').innerHTML = '<div class="success-msg">✅ Cadastrado!</div>';
+    document.getElementById('formCadastro').reset();
+    setTimeout(() => document.getElementById('msgCadastro').innerHTML = '', 2000);
+  }).catch((error) => {
+    console.error("Erro ao gravar no Firebase: ", error);
+  });
+};
+
 let dados = { alunos: {}, chamadas: {} };
 
 const salas = { "0-4": "Pequenos Heróis-0 a 4 anos", "5-7": "Amiguinhos de Cristo-5 a 7 anos", "8-11": "Soldados de Cristo-8 a 11 anos", "12-20": "Gênios da Biblia-12 a 20 anos", "maes": "Débora-Mães" };
