@@ -214,6 +214,15 @@ h1 {
     <div id="listaChamada"></div>
     <button id="btnSalvarChamada" class="btn btn-success" onclick="salvarChamada()" style="display:none">💾 Salvar</button>
     <div id="msgChamada"></div>
+  </div
+    
+  <div style="margin:30px 0">
+    <h3>📅 Gerar Relatório de Múltiplas Datas</h3>
+    <input type="date" id="dataMultipla" />
+    <button class="btn btn-primary" onclick="adicionarData()">➕ Adicionar Data</button>
+    <div id="datasSelecionadas" style="margin:10px 0;"></div>
+    <button class="btn btn-warning" onclick="gerarRelatorioMultidatas()">📄 Gerar Documento</button>
+    <div id="tabelaMultidatas" style="margin-top:20px;"></div>
   </div>
 
   <!-- RELATÓRIO -->
