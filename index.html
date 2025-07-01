@@ -397,42 +397,6 @@ window.salvarRelatorioMultiDatasPdf = () => {
   const conteudo = document.getElementById('relatorioMultiDatas');
   html2pdf().from(conteudo).save('Relatorio-MultiDatas.pdf');
 };
-// Função para salvar dados no localStorage
-const salvarDados = () => {
-  localStorage.setItem('dados', JSON.stringify(dados));
-};
-
-// Função para carregar dados do localStorage
-const carregarDados = () => {
-  const dadosSalvos = localStorage.getItem('dados');
-  if (dadosSalvos) {
-    dados = JSON.parse(dadosSalvos);
-  }
-};
-
-// Chame carregarDados ao inicializar
-document.addEventListener('DOMContentLoaded', () => {
-  carregarDados();
-  atualizarHome();
-});
-
-// Chame salvarDados sempre que os dados forem alterados
-document.getElementById('formCadastro').onsubmit = (e) => {
-  e.preventDefault();
-  const nome = document.getElementById('nomeAluno').value.trim();
-  const sala = document.getElementById('salaAluno').value;
-
-  if (!nome || !sala) return;
-
-  const id = Date.now().toString();
-  dados.alunos[id] = { nome, sala, id };
-  
-  salvarDados(); // Salvar dados após cadastro
-
-  document.getElementById('msgCadastro').innerHTML = '<div class="success-msg">✅ Cadastrado!</div>';
-  document.getElementById('formCadastro').reset();
-  setTimeout(() => document.getElementById('msgCadastro').innerHTML = '', 2000);
-};
 
 </script>
 </body>
