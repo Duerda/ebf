@@ -97,6 +97,13 @@
     <button id="btnSalvarChamada" class="btn btn-success" onclick="salvarChamada()" style="display:none">💾 Salvar</button>
     <div id="msgChamada"></div>
   </div
+    <div class="form-group">
+  <label>Datas (separadas por vírgula):</label>
+  <input type="text" id="datasRelatorioMulti" placeholder="Ex: 17/07,18/07,19/07">
+</div>
+<button class="btn btn-primary" onclick="gerarRelatorioMultiDatas()">📄 Gerar Relatório Multi Datas</button>
+<div id="relatorioMultiDatas" style="margin-top:20px"></div>
+
     
   <div id="msgChamada"></div>
 </div>
@@ -341,6 +348,55 @@ document.addEventListener('DOMContentLoaded', () => {
   
   atualizarHome();
 });
+  window.gerarRelatorioMultiDatas = () => {
+  const sala = document.getElementById('salaChamada').value;
+  const datasInput = document.getElementById('datasRelatorioMulti').value.trim();
+
+  if (!sala || !datasInput) {
+    alert('Selecione a sala e informe as datas.');
+    return;
+  }
+
+  const datas = datasInput.split(',').map(d => d.trim());
+  const alunosSala = Object.values(dados.alunos).filter(a => a.sala === sala);
+
+  if (alunosSala.length === 0) {
+    document.getElementById('relatorioMultiDatas').innerHTML = '<p style="color:#6b7280;padding:20px">Nenhum aluno nesta sala</p>';
+    return;
+  }
+
+  let html = `<h3>📄 Relatório: ${salas[sala]}</h3>`;
+  html += `<table border="1" cellpadding="6" style="width:100%;border-collapse:collapse">`;
+  html += `<tr><th>Aluno</th>`;
+
+  datas.forEach(data => {
+    html += `<th>${data}</th>`;
+  });
+  html += `</tr>`;
+
+  alunosSala.forEach(aluno => {
+    html += `<tr><td>${aluno.nome}</td>`;
+    datas.forEach(data => {
+      const dataIso = `${data.split('/')[2] || new Date().getFullYear()}-${data.split('/')[1]}-${data.split('/')[0]}`;
+      const status = dados.chamadas[dataIso]?.[sala]?.[aluno.id];
+      let statusText = '-';
+      if (status === 'presente') statusText = 'P';
+      if (status === 'falta') statusText = 'F';
+      html += `<td style="text-align:center">${statusText}</td>`;
+    });
+    html += `</tr>`;
+  });
+
+  html += `</table><button class="btn btn-success" style="margin-top:10px" onclick="salvarRelatorioMultiDatasPdf()">📄 Salvar PDF</button>`;
+
+  document.getElementById('relatorioMultiDatas').innerHTML = html;
+};
+
+window.salvarRelatorioMultiDatasPdf = () => {
+  const conteudo = document.getElementById('relatorioMultiDatas');
+  html2pdf().from(conteudo).save('Relatorio-MultiDatas.pdf');
+};
+
 </script>
 </body>
 </html>
