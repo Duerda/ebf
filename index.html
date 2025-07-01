@@ -98,6 +98,18 @@
 </div>
 
 <script>
+  //remover um aluno na chamada
+  alunosSala.forEach(aluno => {
+  const status = chamadaData[aluno.id] || '';
+  html += `
+    <div style="display:flex;gap:8px;align-items:center;margin:4px 0">
+      <span style="flex:1">${aluno.nome}</span>
+      <button onclick="marcarPresenca('${aluno.id}','presente')" class="btn btn-success btn-sm ${status==='presente'?'active':''}">✅</button>
+      <button onclick="marcarPresenca('${aluno.id}','falta')" class="btn btn-danger btn-sm ${status==='falta'?'active':''}">❌</button>
+      <button onclick="removerAluno('${aluno.id}')" class="btn btn-warning btn-sm">🗑️</button>
+    </div>`;
+});
+
     let dados = { alunos: {}, chamadas: {} };
 
 const salas = {
