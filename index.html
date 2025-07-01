@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>EBF - Sistema</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -98,19 +101,21 @@
 </div>
 
 <script>
-  //remover um aluno na chamada
-  alunosSala.forEach(aluno => {
-  const status = chamadaData[aluno.id] || '';
-  html += `
-    <div style="display:flex;gap:8px;align-items:center;margin:4px 0">
-      <span style="flex:1">${aluno.nome}</span>
-      <button onclick="marcarPresenca('${aluno.id}','presente')" class="btn btn-success btn-sm ${status==='presente'?'active':''}">✅</button>
-      <button onclick="marcarPresenca('${aluno.id}','falta')" class="btn btn-danger btn-sm ${status==='falta'?'active':''}">❌</button>
-      <button onclick="removerAluno('${aluno.id}')" class="btn btn-warning btn-sm">🗑️</button>
-    </div>`;
-});
+ // Configuração Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyD7atpL2A3pQaE8gjGLfsukXVhK0NtgO-w",
+  authDomain: "ebf-secretaria.firebaseapp.com",
+  databaseURL: "https://ebf-secretaria-default-rtdb.firebaseio.com",
+  projectId: "ebf-secretaria",
+  storageBucket: "ebf-secretaria.appspot.com",
+  messagingSenderId: "36994588954",
+  appId: "1:36994588954:web:8d78a074acd15862684ca3",
+  measurementId: "G-PQZMG8MBLE"
+};
 
-    let dados = { alunos: {}, chamadas: {} };
+// Inicializa Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
 const salas = {
   "0-4": "Pequenos Heróis-0 a 4 anos",
@@ -120,220 +125,131 @@ const salas = {
   "maes": "Débora-Mães"
 };
 
-window.showSection = (id) => {
-  document.querySelectorAll('.section, .btn').forEach(e => e.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  document.querySelector(`[onclick="showSection('${id}')"]`).classList.add('active');
-
-  if (id === 'home') atualizarHome();
-  if (id === 'relatorio') document.getElementById('dataRelatorio').value = new Date().toISOString().split('T')[0];
-};
-
-window.atualizarHome = () => {
-  const total = Object.keys(dados.alunos).length;
-  const hoje = new Date().toISOString().split('T')[0];
-  const chamadaHoje = dados.chamadas[hoje] || {};
-  let presentes = 0, faltas = 0;
-
-  Object.values(chamadaHoje).forEach(sala => {
-    Object.values(sala).forEach(status => {
-      if (status === 'presente') presentes++;
-      else if (status === 'falta') faltas++;
-    });
-  });
-
-  document.getElementById('totalAlunos').textContent = total;
-  document.getElementById('presentesHoje').textContent = presentes;
-  document.getElementById('faltasHoje').textContent = faltas;
-};
-
-// Cadastro
-document.getElementById('formCadastro').onsubmit = (e) => {
+// Cadastro de aluno
+document.getElementById("formCadastro").onsubmit = (e) => {
   e.preventDefault();
-  const nome = document.getElementById('nomeAluno').value.trim();
-  const sala = document.getElementById('salaAluno').value;
+  const nome = document.getElementById("nomeAluno").value.trim();
+  const sala = document.getElementById("salaAluno").value;
   if (!nome || !sala) return;
-  const id = Date.now().toString();
-  dados.alunos[id] = { nome, sala, id };
-  document.getElementById('msgCadastro').innerHTML = '<div class="success-msg">✅ Cadastrado!</div>';
-  document.getElementById('formCadastro').reset();
-  setTimeout(() => document.getElementById('msgCadastro').innerHTML = '', 2000);
+
+  const novoAlunoRef = db.ref("alunos").push();
+  novoAlunoRef.set({ nome, sala, id: novoAlunoRef.key });
+
+  document.getElementById("msgCadastro").innerHTML = "<div class='success-msg'>✅ Cadastrado!</div>";
+  document.getElementById("formCadastro").reset();
+  setTimeout(() => document.getElementById("msgCadastro").innerHTML = "", 2000);
 };
 
-// Chamada
+// Carregar chamada
 window.carregarChamada = () => {
-  const sala = document.getElementById('salaChamada').value;
-  const data = document.getElementById('dataChamada').value;
-
+  const sala = document.getElementById("salaChamada").value;
+  const data = document.getElementById("dataChamada").value;
   if (!sala || !data) {
-    document.getElementById('listaChamada').innerHTML = '';
-    document.getElementById('btnSalvarChamada').style.display = 'none';
-    document.getElementById('cadastroRapido').style.display = 'none';
+    document.getElementById("listaChamada").innerHTML = "";
+    document.getElementById("cadastroRapido").style.display = "none";
     return;
   }
 
-  document.getElementById('cadastroRapido').style.display = 'block';
+  document.getElementById("cadastroRapido").style.display = "block";
 
-  const alunosSala = Object.values(dados.alunos).filter(a => a.sala === sala);
-  const chamadaData = dados.chamadas[data]?.[sala] || {};
-  let html = `<h3>📋 Chamada de ${salas[sala]}</h3>`;
+  db.ref("alunos").orderByChild("sala").equalTo(sala).once("value", snapshot => {
+    const alunos = snapshot.val();
+    let html = `<h3>📋 Chamada de ${salas[sala]}</h3>`;
 
-  if (alunosSala.length === 0) {
-    html += '<p style="color:#6b7280;padding:10px">Nenhum aluno nessa sala</p>';
-  } else {
-    alunosSala.forEach(aluno => {
-      const status = chamadaData[aluno.id] || '';
+    if (!alunos) {
+      html += "<p style='color:#6b7280;padding:10px'>Nenhum aluno nesta sala</p>";
+      document.getElementById("listaChamada").innerHTML = html;
+      return;
+    }
+
+    Object.values(alunos).forEach(aluno => {
       html += `
         <div style="display:flex;gap:8px;align-items:center;margin:4px 0">
           <span style="flex:1">${aluno.nome}</span>
-          <button onclick="marcarPresenca('${aluno.id}','presente')" class="btn btn-success btn-sm ${status==='presente'?'active':''}">✅</button>
-          <button onclick="marcarPresenca('${aluno.id}','falta')" class="btn btn-danger btn-sm ${status==='falta'?'active':''}">❌</button>
+          <button onclick="marcarPresenca('${aluno.id}','presente')" class="btn btn-success btn-sm">✅</button>
+          <button onclick="marcarPresenca('${aluno.id}','falta')" class="btn btn-danger btn-sm">❌</button>
+          <button onclick="removerAluno('${aluno.id}')" class="btn btn-warning btn-sm">🗑️</button>
         </div>`;
     });
-  }
 
-  document.getElementById('listaChamada').innerHTML = html;
-  document.getElementById('btnSalvarChamada').style.display = 'block';
+    document.getElementById("listaChamada").innerHTML = html;
+  });
 };
 
+// Marcar presença/falta
 window.marcarPresenca = (alunoId, status) => {
-  const sala = document.getElementById('salaChamada').value;
-  const data = document.getElementById('dataChamada').value;
-  if (!data || !sala) return;
+  const sala = document.getElementById("salaChamada").value;
+  const data = document.getElementById("dataChamada").value;
+  if (!sala || !data) return;
 
-  if (!dados.chamadas[data]) dados.chamadas[data] = {};
-  if (!dados.chamadas[data][sala]) dados.chamadas[data][sala] = {};
-  dados.chamadas[data][sala][alunoId] = status;
-
-  carregarChamada();
+  db.ref(`chamadas/${data}/${sala}/${alunoId}`).set(status);
 };
 
+// Cadastro rápido
 window.cadastroRapido = () => {
-  const nome = document.getElementById('nomeRapido').value.trim();
-  const sala = document.getElementById('salaChamada').value;
+  const nome = document.getElementById("nomeRapido").value.trim();
+  const sala = document.getElementById("salaChamada").value;
   if (!nome || !sala) return;
-  const id = Date.now().toString();
-  dados.alunos[id] = { nome, sala, id };
-  document.getElementById('nomeRapido').value = '';
+
+  const novoAlunoRef = db.ref("alunos").push();
+  novoAlunoRef.set({ nome, sala, id: novoAlunoRef.key });
+  document.getElementById("nomeRapido").value = "";
   carregarChamada();
 };
 
-window.salvarChamada = () => {
-  const sala = document.getElementById('salaChamada').value;
-  const data = document.getElementById('dataChamada').value;
-  if (!data || !sala) return;
+// Remover aluno
+window.removerAluno = (alunoId) => {
+  if (!confirm("Remover aluno permanentemente?")) return;
 
-  const chamadaSala = dados.chamadas[data]?.[sala] || {};
-  let html = `<h2>Chamada - ${salas[sala]}</h2>
-    <p>Data: ${new Date(data+'T00:00:00').toLocaleDateString('pt-BR')}</p>
-    <table border="1" cellpadding="8" style="width:100%;border-collapse:collapse">
-    <tr style="background:#f8f9fa"><th>Aluno</th><th>Status</th></tr>`;
-
-  Object.entries(chamadaSala).forEach(([id, status]) => {
-    const statusText = status === 'presente' ? '✅ Presente' : '❌ Falta';
-    html += `<tr><td>${dados.alunos[id]?.nome||'N/A'}</td><td>${statusText}</td></tr>`;
-  });
-
-  html += '</table>';
-
-  html2pdf().from(html).save(`Chamada-${salas[sala]}-${data}.pdf`);
-};
-
-window.gerarRelatorioMultiDatas = () => {
-  const sala = document.getElementById('salaChamada').value;
-  const datasInput = document.getElementById('datasRelatorioMulti').value.trim();
-  if (!sala || !datasInput) {
-    alert('Selecione a sala e informe as datas.');
-    return;
-  }
-
-  const datas = datasInput.split(',').map(d => d.trim());
-  const alunosSala = Object.values(dados.alunos).filter(a => a.sala === sala);
-  if (alunosSala.length === 0) {
-    document.getElementById('relatorioMultiDatas').innerHTML = '<p style="color:#6b7280;padding:20px">Nenhum aluno nesta sala</p>';
-    return;
-  }
-
-  let html = `<h3>📄 Relatório: ${salas[sala]}</h3>
-    <table border="1" cellpadding="6" style="width:100%;border-collapse:collapse">
-    <tr><th>Aluno</th>`;
-
-  datas.forEach(data => html += `<th>${data}</th>`);
-  html += '</tr>';
-
-  alunosSala.forEach(aluno => {
-    html += `<tr><td>${aluno.nome}</td>`;
-    datas.forEach(data => {
-      const dataIso = `${data.split('/')[2]||new Date().getFullYear()}-${data.split('/')[1]}-${data.split('/')[0]}`;
-      const status = dados.chamadas[dataIso]?.[sala]?.[aluno.id];
-      let statusText = '-';
-      if (status === 'presente') statusText = 'P';
-      if (status === 'falta') statusText = 'F';
-      html += `<td style="text-align:center">${statusText}</td>`;
+  db.ref("alunos/" + alunoId).remove();
+  db.ref("chamadas").once("value", snapshot => {
+    snapshot.forEach(dataSnap => {
+      dataSnap.forEach(salaSnap => {
+        salaSnap.ref.child(alunoId).remove();
+      });
     });
-    html += '</tr>';
   });
 
-  html += `</table><button class="btn btn-success" style="margin-top:10px" onclick="salvarRelatorioMultiDatasPdf()">📄 Salvar PDF</button>`;
-
-  document.getElementById('relatorioMultiDatas').innerHTML = html;
+  carregarChamada();
 };
 
-window.salvarRelatorioMultiDatasPdf = () => {
-  html2pdf().from(document.getElementById('relatorioMultiDatas')).save('Relatorio-MultiDatas.pdf');
-};
-
-window.carregarRelatorio = () => {
-  const data = document.getElementById('dataRelatorio').value;
-  if (!data) return;
-
-  const chamadaData = dados.chamadas[data] || {};
-  let html = `<h3>📅 ${new Date(data + 'T00:00:00').toLocaleDateString('pt-BR')}</h3>`;
-  let maxPresentes = 0, salaDestaque = '';
-  const dadosSalas = {};
-
-  Object.keys(salas).forEach(sala => {
-    const alunosSala = Object.values(dados.alunos).filter(a => a.sala === sala);
-    const chamadaSala = chamadaData[sala] || {};
-    const presentes = Object.values(chamadaSala).filter(s => s === 'presente').length;
-    const faltas = Object.values(chamadaSala).filter(s => s === 'falta').length;
-    dadosSalas[sala] = { presentes, faltas, total: alunosSala.length };
-
-    if (presentes > maxPresentes) {
-      maxPresentes = presentes;
-      salaDestaque = sala;
-    }
+// Atualiza dados no home
+function atualizarHome() {
+  db.ref("alunos").once("value", snapshot => {
+    const total = snapshot.numChildren();
+    document.getElementById("totalAlunos").textContent = total;
   });
 
-  Object.keys(salas).forEach(sala => {
-    const d = dadosSalas[sala];
-    const isDestaque = sala === salaDestaque && maxPresentes > 0;
-    html += `<div class="card ${isDestaque ? 'highlight' : ''}">
-      <h4>${salas[sala]} ${isDestaque ? '🥇' : ''}</h4>
-      <div class="stats">
-        <div class="stat-card"><div class="stat-number">${d.total}</div><div class="stat-label">Total</div></div>
-        <div class="stat-card"><div class="stat-number" style="color:#10b981">${d.presentes}</div><div class="stat-label">Presentes</div></div>
-        <div class="stat-card"><div class="stat-number" style="color:#ef4444">${d.faltas}</div><div class="stat-label">Faltas</div></div>
-      </div></div>`;
+  const hoje = new Date().toISOString().split("T")[0];
+  db.ref(`chamadas/${hoje}`).once("value", snapshot => {
+    let presentes = 0, faltas = 0;
+    snapshot.forEach(salaSnap => {
+      salaSnap.forEach(statusSnap => {
+        if (statusSnap.val() === "presente") presentes++;
+        else if (statusSnap.val() === "falta") faltas++;
+      });
+    });
+    document.getElementById("presentesHoje").textContent = presentes;
+    document.getElementById("faltasHoje").textContent = faltas;
   });
+}
 
-  html += `<button class="btn btn-primary" onclick="salvarRelatorioPdf('${data}')">📄 Gerar PDF</button>`;
-  document.getElementById('conteudoRelatorio').innerHTML = html;
+// Seções
+window.showSection = (id) => {
+  document.querySelectorAll(".section, .btn").forEach(e => e.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  document.querySelector(`[onclick="showSection('${id}')"]`).classList.add("active");
+  if (id === "home") atualizarHome();
 };
 
-window.salvarRelatorioPdf = (data) => {
-  html2pdf().from(document.getElementById('conteudoRelatorio')).save(`Relatorio-EBF-${data}.pdf`);
-};
-
-document.addEventListener('DOMContentLoaded', () => {
-  const hoje = new Date().toISOString().split('T')[0];
-  document.getElementById('dataRelatorio').value = hoje;
-  document.getElementById('dataChamada').value = hoje;
+// Inicializa com a data de hoje
+document.addEventListener("DOMContentLoaded", () => {
+  const hoje = new Date().toISOString().split("T")[0];
+  document.getElementById("dataChamada").value = hoje;
   atualizarHome();
+  document.getElementById("salaChamada").onchange = carregarChamada;
+  document.getElementById("dataChamada").onchange = carregarChamada;
 });
-
-document.getElementById('salaChamada').onchange = carregarChamada;
-document.getElementById('dataChamada').onchange = carregarChamada;
 
 </script>
 
